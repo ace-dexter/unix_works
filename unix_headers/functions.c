@@ -8,6 +8,14 @@ char *pname = NULL;		/*caller can set this from argv[0]*/
 /* Non fatal error related to a system call.
 	print a message and return. */
 
+void err_ret(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	err_doit(1, fmt, ap);
+	va_end(ap);
+}
+
 void err_sys(const char *fmt, ...)
 {
 	va_list ap;
