@@ -1,6 +1,20 @@
 #include<errno.h>	/*for definition of err no*/
 #include<stdarg.h>	/*ANSI C header file*/
 #include "ourhdr.h"
+#include<limits.h>
+
+/**for path_alloc function**/
+#ifdef PATH_MAX
+static int pathmax = PATH_MAX;
+#endif
+#else
+static int pathmax = 0;
+#endif
+
+#define PATH_MAX_GUESS 1024     /*If PATH_MAX is indeterminate */
+                                /*we are not guaranteed this is adequate */
+
+/*****End of requirement for path_alloc function ***/
 
 static void err_doit(int, const char *, va_list);
 
@@ -53,4 +67,32 @@ static void err_doit(int errnoflag, const char *fmt, va_list ap)
 	fflush(NULL);	/* flushes all stdio output streams */
 	return ;
 
+}
+
+char *
+path_alloc(int *size)
+            /*also return allocated size if nonnull*/
+{
+	char *ptr;
+	
+	if(pathmax == 0)	/*first time through*/
+	{
+		errno = 0;
+		if( (pathmax = pathconf("/", _PC_PATH_MAX)) < 0)
+		{
+			if(errno == 0)
+				pathmax = PATH_MAX_GUESS;	/*It's indeterminate*/
+			else
+				err_sys("pathconf error for PC_PATH_MAX");
+		}
+		else
+			pathmax++;		/*Add one since it's relative to the root*/
+	}
+	if ( (ptr = malloc(pathmax+1)) == NULL)
+		err_sys("malloc arror for pathname");
+
+	if ( size != NULL)
+		*size = pathmax+1;
+
+	return(ptr);
 }
