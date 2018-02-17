@@ -6,7 +6,6 @@
 /**for path_alloc function**/
 #ifdef PATH_MAX
 static int pathmax = PATH_MAX;
-#endif
 #else
 static int pathmax = 0;
 #endif
